@@ -2,73 +2,229 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Práctica 3 DASH - Parte 2.3 (Métricas)</title>
-    <script src="dash.all.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DASH Monitor Pro - Parte 2.3</title>
+    <script src="../dash.all.min.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        video { width: 800px; height: 450px; background: #000; border-radius: 8px; }
-        .metrics { margin-top: 20px; text-align: left; display: inline-block; background: #2c3e50; color: white; padding: 15px; border-radius: 8px; min-width: 300px; }
-        .metrics p { margin: 5px 0; font-family: monospace; }
-        .metrics span { color: #3498db; font-weight: bold; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-main: #f1f5f9;
+            --success-color: #22c55e;
+            --warning-color: #fbbf24;
+            --danger-color: #ef4444;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 840px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 { 
+            font-weight: 300; 
+            letter-spacing: 3px; 
+            margin-bottom: 1.5rem; 
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        .video-wrapper {
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(56, 189, 248, 0.2);
+        }
+
+        video { 
+            width: 100%; 
+            display: block;
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Estilos para los nuevos botones de resolución */
+        .controls-panel {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-quality {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-quality:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .btn-auto {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .btn-auto:hover {
+            background: var(--success-color);
+            color: var(--bg-color);
+        }
+
+        .metrics-display { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 1rem; 
+            margin-top: 2rem; 
+        }
+
+        .metric-card {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 1.25rem;
+            border-radius: 1rem;
+            border-bottom: 4px solid var(--accent-color);
+        }
+
+        .metric-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .metric-data {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--success-color);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Mi propio Streaming DASH con Métricas</h2>
+    <div class="dashboard-container">
+        <h2>DASH Control Panel</h2>
         
-        <video class="dashjs-player" autoplay controls preload="auto" muted></video>
+        <div class="video-wrapper">
+            <video class="dashjs-player" autoplay controls preload="auto" muted></video>
+        </div>
 
-        <div class="metrics">
-            <p>Video Bitrate: <span id="bitrate"></span> Kbps</p>
-            <p>Video Buffer: <span id="buffer"></span> seconds</p>
-            <p>Video Representation: <span id="representation"></span></p>
+        <div class="controls-panel">
+            <button class="btn-quality" onclick="cambiarCalidad(0)">Baja (100K)</button>
+            <button class="btn-quality" onclick="cambiarCalidad(1)">Media (600K)</button>
+            <button class="btn-quality" onclick="cambiarCalidad(2)">Alta (2400K)</button>
+            <button class="btn-quality btn-auto" onclick="activarAuto()">Auto (ABR)</button>
+        </div>
+
+        <div class="metrics-display">
+            <div class="metric-card">
+                <span class="metric-title">Bitrate</span>
+                <div class="metric-data"><span id="bitrate">0</span><small style="color:#64748b; font-size:0.8rem;"> Kbps</small></div>
+            </div>
+            <div class="metric-card" style="border-bottom-color: var(--warning-color);">
+                <span class="metric-title">Buffer</span>
+                <div class="metric-data"><span id="buffer">0.000</span><small style="color:#64748b; font-size:0.8rem;"> sec</small></div>
+            </div>
+            <div class="metric-card" style="border-bottom-color: #a78bfa;">
+                <span class="metric-title">Rep</span>
+                <div class="metric-data" style="font-size: 0.9rem;"><span id="representation">---</span></div>
+            </div>
         </div>
     </div>
 
     <script>
+        var player; // Definimos player fuera para acceder desde los botones
+
         document.addEventListener("DOMContentLoaded", function () {
             init();
         });
 
         function init(){
-            var video, player, mpd_url;
-            
-            // Apuntamos a tu propio manifiesto generado con Bento4 [cite: 145]
-            mpd_url = "../output/stream.mpd";
+            var video, mpd_url;
+            mpd_url = "../output/stream.mpd"; 
             video = document.querySelector("video");
             
-            player = dashjs.MediaPlayer().create(); [cite: 147]
-            player.initialize(video, mpd_url, true); [cite: 148]
+            player = dashjs.MediaPlayer().create();
+            player.initialize(video, mpd_url, true);
 
-            // Intervalo para actualizar métricas cada 500ms 
             var eventPoller = setInterval(function() {
-                var streamInfo = player.getActiveStream().getStreamInfo(); [cite: 153]
-                var dashMetrics = player.getDashMetrics(); [cite: 154]
-                var dashAdapter = player.getDashAdapter(); [cite: 155]
+                var streamInfo = player.getActiveStream().getStreamInfo();
+                var dashMetrics = player.getDashMetrics();
+                var dashAdapter = player.getDashAdapter();
 
                 if (dashMetrics && streamInfo) {
-                    const periodIdx = streamInfo.index; [cite: 158]
-                    
-                    // Extraer representación y nivel de buffer [cite: 159, 160]
+                    const periodIdx = streamInfo.index;
                     var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
                     var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
-                    
-                    // Calcular bitrate en Kbps [cite: 161, 162]
-                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : 0;
 
-                    // Pintar los datos en el HTML [cite: 163, 164]
-                    document.getElementById('buffer').innerText = bufferLevel.toFixed(3) + " secs";
+                    document.getElementById('buffer').innerText = bufferLevel.toFixed(3);
                     document.getElementById('bitrate').innerText = bitrate;
-                    document.getElementById('representation').innerText = repSwitch ? repSwitch.to : "Buscando...";
+                    document.getElementById('representation').innerText = repSwitch ? repSwitch.to : "Adjusting...";
                 }
             }, 500);
 
-            // Detener el poller al terminar el vídeo [cite: 149-151]
             player.on(dashjs.MediaPlayer.events["PLAYBACK_ENDED"], function() {
                 clearInterval(eventPoller);
             });
+        }
+
+        // Función para cambiar manualmente la calidad
+        function cambiarCalidad(indice) {
+            // Desactivamos el autoSwitch para que no sobreescriba nuestra elección
+            player.updateSettings({
+                'streaming': {
+                    'abr': {
+                        'autoSwitchBitrate': {
+                            'video': false
+                        }
+                    }
+                }
+            });
+            // Aplicamos la calidad (0=Low, 1=Med, 2=High en base a tu Bento4)
+            player.setQualityFor('video', indice);
+            console.log("Calidad forzada al índice: " + indice);
+        }
+
+        // Función para volver al modo automático (ABR)
+        function activarAuto() {
+            player.updateSettings({
+                'streaming': {
+                    'abr': {
+                        'autoSwitchBitrate': {
+                            'video': true
+                        }
+                    }
+                }
+            });
+            console.log("Modo automático reactivado");
         }
     </script>
 </body>
