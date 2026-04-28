@@ -2,26 +2,72 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Práctica 3 DASH - Parte 1</title>
     <script src="dash.all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h2 { 
+            color: #2c3e50; 
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        /* Tamaño ampliado a 800px */
+        .dashjs-player {
+            width: 800px; 
+            height: 450px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background-color: #000;
+        }
+        .footer-text {
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #95a5a6;
+        }
+    </style>
 </head>
 <body>
-    <h2>Reproductor DASH Básico - Envivo</h2>
-    
-    <video class="dashjs-player" autoplay controls preload="auto">
-        <source src="https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd" type="application/dash+xml"/>
-    </video>
+
+    <div class="container">
+        <h2>Reproductor DASH - Envivo Test</h2>
+        
+        <video class="dashjs-player" autoplay controls preload="auto">
+            <source src="https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd" type="application/dash+xml"/>
+        </video>
+
+        <p class="footer-text">IRAC 2026 - Control de Flujo Adaptativo</p>
+    </div>
 
     <script>
-        
         var player;
         document.addEventListener("DOMContentLoaded", function () {
             init();
         });
         function init(){
-            player = dashjs.MediaPlayerFactory.create(document.querySelector(".dashjs-player"));
+            var videoElement = document.querySelector(".dashjs-player");
+            player = dashjs.MediaPlayerFactory.create(videoElement);
         };
     </script>
 </body>
 </html>
-
